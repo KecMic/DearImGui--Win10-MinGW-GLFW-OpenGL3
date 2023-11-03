@@ -1,0 +1,72 @@
+###############################################################################
+#
+# to call this makefile, run './build.sh' or 'mingw32-make.exe --file=Makefile_objs all'
+#
+###############################################################################
+
+# $(print_hline)
+define print_hline
+	@printf "~%.0s" {1..80}; echo " "
+endef
+
+GLFW_PATH := "${HOME}/Downloads/glfw-3.3.8.bin.WIN32/glfw-3.3.8.bin.WIN32"
+
+INCS := \
+-I./ \
+-I$(GLFW_PATH)/include
+
+LIBS := -L$(GLFW_PATH)/lib-mingw -lglfw3dll -lopengl32
+
+SRCS := $(shell (find . -maxdepth 1 -type f -name '*.cpp'))
+OBJS := $(SRCS:.cpp=.o)
+
+# all build artefacts will be in $(BUILD_DIR)
+# => objs will be in $(BUILD_DIR)/$(OBJ_DIR)
+# => exe  will be in $(BUILD_DIR)/$(BIN_DIR)
+BUILD_DIR := build
+OBJ_DIR := $(BUILD_DIR)/obj
+BIN_DIR := $(BUILD_DIR)/bin
+OBJS_BUILD := ${patsubst %.o,$(OBJ_DIR)/%.o,${OBJS}}
+
+# info prints
+$(info ==================================)
+$(info SRCS:       $(SRCS))
+$(info OBJS:       $(OBJS))
+$(info BUILD_DIR:  $(BUILD_DIR))
+$(info OBJ_DIR:    $(OBJ_DIR))
+$(info BIN_DIR:    $(BIN_DIR))
+$(info OBJS_BUILD: $(OBJS_BUILD))
+$(info ==================================)
+
+# exe
+MAIN_TARGET_NAME := main.exe
+MAIN_TARGET_PATH := $(BIN_DIR)/$(MAIN_TARGET_NAME)
+
+all: $(MAIN_TARGET_PATH) Makefile_objs
+	$(print_hline)
+	@echo "Building target '$@', deps '$^'"
+	$(info "Building target '$@' using deps '$^'")
+
+$(MAIN_TARGET_PATH): $(OBJS_BUILD)
+	$(print_hline)
+	echo $(SRCS)
+	mkdir -p $(dir $(MAIN_TARGET_PATH))
+	@echo "Building target '$@', deps '$^'"
+	g++ -fdiagnostics-color=always -std=c++17 -g $(INCS) $^ -o $(MAIN_TARGET_PATH) $(LIBS)
+
+$(OBJ_DIR)/%.o: %.cpp
+	$(print_hline)
+	mkdir -p $(dir $@)
+	@echo "Building target '$@', deps '$^'"
+	g++ -fdiagnostics-color=always -std=c++17 -g $(INCS) -c $< -o $@
+
+run: $(MAIN_TARGET_PATH)
+	$(print_hline)
+	@echo "running '$<':"
+	@$<
+
+clean:
+	rm -f imgui.ini
+	rm -rf $(BUILD_DIR)/
+
+.PHONY: all run clean

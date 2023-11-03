@@ -1,0 +1,54 @@
+###############################################################################
+#
+# to call this makefile, run './build.sh'
+#
+# notes:
+#	-) info, warning, error
+#	-) -lgdi32 -limm32 -lshell32
+#	-) -luser32 -lkernel32 -lmingw32
+# 	-) -ld3d12 -ldwmapi -lgdi32 // DirectX 12
+# 	-) -DImTextureID=ImU64
+###############################################################################
+
+# $(print_hline)
+define print_hline
+	@printf "~%.0s" {1..80}; echo " "
+endef
+
+MAIN_TARGET := main.exe
+GLFW_PATH := "${HOME}/Downloads/glfw-3.3.8.bin.WIN32/glfw-3.3.8.bin.WIN32"
+
+# TODO: use these, so don't need to copy in imgui source files
+#SRCS_IMGUI          := $(shell (find ../github_repos/imgui          -maxdepth 1 -type f -name 'im*'))
+#SRCS_IMGUI_BACKENDS := $(shell (find ../github_repos/imgui/backends -maxdepth 1 -type f -name 'imgui_impl_opengl3*' -o -name 'imgui_impl_glfw*'))
+
+SRCS := *.cpp
+
+INCS := \
+-I./ \
+-I$(GLFW_PATH)/include
+
+LIBS := -L$(GLFW_PATH)/lib-mingw -lglfw3dll -lopengl32
+
+all: $(MAIN_TARGET)
+#	$(print_hline)
+#	@echo "SRCS_IMGUI: |$(SRCS_IMGUI)|"
+#	@echo "SRCS_IMGUI_BACKENDS: |$(SRCS_IMGUI_BACKENDS)|"
+	$(print_hline)
+	@echo "Building target '$@', deps '$^'"
+	$(info "Building target '$@' using deps '$^'")
+
+$(MAIN_TARGET): main.cpp Makefile
+	$(print_hline)
+	@echo "Building target '$@', deps '$^'"
+	g++ -fdiagnostics-color=always -std=c++17 -g $(INCS) $(SRCS) -o $@ $(LIBS)
+
+run: $(MAIN_TARGET)
+	$(print_hline)
+	@echo "running $(MAIN_TARGET):"
+	@./$(MAIN_TARGET)
+
+clean:
+	rm -f $(MAIN_TARGET) imgui.ini
+
+.PHONY: all run clean

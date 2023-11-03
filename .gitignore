@@ -1,0 +1,6 @@
+# build artefacts from Makefile
+*.exe
+imgui.ini
+
+# build artefacts from Makefile_objs
+build/
